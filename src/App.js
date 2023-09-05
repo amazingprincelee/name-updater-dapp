@@ -1,172 +1,137 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from "react";
 import './App.css';
 import { ethers } from "ethers";
-import ABI from './ABI'
-import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum'
-import { Web3Modal } from '@web3modal/react'
-import { configureChains, createConfig, WagmiConfig } from 'wagmi'
-import { arbitrum, mainnet, polygon, bscTestnet } from 'wagmi/chains'
-import { Web3Button } from '@web3modal/react'
+import ABI from "./ABI"
+
+
+
+
 
 
 
 
 function App() {
+  const [nameChange, setNameChange]= useState("")
+  const [name, setName] = useState("");
+  const [walletBalance, setWalletBalance] = useState(0)
+  const [dappName, setDappName] = useState("");
+  const [nameList, setNameList] = useState([]);
 
-  const[balance, setBalance] = useState('');
-  const[username, setuserName] = useState('');
-  const[userNameValue, setUserNameValue] = useState("")
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
 
+  const contractAddress = "0xdaBa94659Af7644e2e96b17Ab7F7ADD4595DCB02";
 
+  const contract = new ethers.Contract(contractAddress, ABI, signer);
 
+ 
   
 
 
-  // const rpcUrl = 'https://data-seed-prebsc-1-s1.binance.org:8545/'
-  // const rpcUrl = 'https://blue-sly-asphalt.bsc-testnet.discover.quiknode.pro/3e6a1315af4a14d0b57dab81e0a3cf16b6aa8bed/';
+  useEffect(()=>{
+    const connectWallet = async() => {
+      await provider.send("eth_requestAccounts", []);
 
-
-
-// const provider = new ethers.providers.Web3Provider(rpc);
-const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-
-
-  // You can also use an ENS name for the contract address
-  const contractAddress = "0xb992bBE199cF01C595C0986431Cb66e81A000D84";
-  const contractAbi = ABI;
-
-  // The Contract object
-  const contract = new ethers.Contract(contractAddress, contractAbi, signer);
-
-  const chains = [arbitrum, mainnet, polygon, bscTestnet]
-const projectId = 'ca559485a535273ba70c435146722200'
-
-const { publicClient } = configureChains(chains, [w3mProvider({ projectId })])
-const wagmiConfig = createConfig({
-  autoConnect: true,
-  connectors: w3mConnectors({ projectId, chains }),
-  publicClient
-})
-const ethereumClient = new EthereumClient(wagmiConfig, chains)
-
-
-useEffect(()=>{
-
-const getBalance = async () => {
-  const balance = await provider.getBalance(contractAddress);
-  const formatedBalance = ethers.utils.formatEther(balance);
-  setBalance(formatedBalance);  
-}
-
-const getUserName = async () => {
-  const ownerName = await contract.getUsersName();
-  setuserName(ownerName);
-}
-
-
-getUserName()
-  .catch(console.error)
-
-getBalance()
-  .catch(console.error);
-})
-
-
- const handleConnect = async () => {
-
-  if(window.ethereum){
-
-    try{
-      await window.ethereum.request({method: 'eth_requestAccounts'});
-    } catch (error) {
-      console.error('Error connecting to Metamask Wallet', error)
     }
-  }else{
-    console.error('Metamask Wallet or wallet extension not detected');
-  }
+
+    const updateDappName = async() => {
+       const dappNamer = await contract.getDappName();
+
+       setDappName(dappNamer);
+    }
+
+    const accountBalance = async() => {
+
+      const balance = await provider.getBalance("0x246cc531a16103Cd883E1179ae880323D28b31C0");
+      const formatedBalance = ethers.utils.formatEther(balance);
+      const balanceRounded = parseFloat(formatedBalance).toFixed(2);
+      setWalletBalance(balanceRounded)
+
+
+
+    }
+
+    const getNameArray =  async() => {
+
+      const names = await contract.getNamesList();
+
+      setNameList(names)
+
+    }
+
+
+    getNameArray()
+    .catch(console.error)
+
+
+    updateDappName()
+    .catch(console.error)
+
+    accountBalance()
+    .catch(console.error);
+
+    connectWallet()
+    .catch(console.error);
+
+    
+  })
+
+
  
 
+ 
+
+  const handleChange = (e) => {
+    setNameChange(e.target.value)
+    
+
+  }
+
+  const handleSubmit = async (e) => {
+      e.preventDefault();
+       await contract.addNames(nameChange);
+
+
+
+  }
+
   
- }
-
-
- const handleChange = (e) => {
-  setUserNameValue(e.target.value)
-
- }
-
- const handleUserSubmit =  async (e) => {
-  e.preventDefault();
-  const userName = await contract.setOwnerName(userNameValue);
-   await userName.wait();
-   setUserNameValue(userNameValue)
- }
-
-
-
-
-
-
-
-//  const handleConnect = async () => {
-//   if (window.ethereum) {
-//     try {
-//       // Request access to the user's MetaMask accounts
-//       await window.ethereum.request({ method: 'eth_requestAccounts' });
-//       // After enabling, you can use the MetaMask provider
-//       const provider = new ethers.providers.Web3Provider(window.ethereum, 'any'); // Use the 'any' network as it's a custom network.
-//       const signer = provider.getSigner();
-//       // Continue with your contract interactions using the MetaMask provider
-//     } catch (error) {
-//       console.error('Error connecting MetaMask wallet:', error);
-//     }
-//   } else {
-//     console.error('MetaMask wallet not detected. Please install and connect MetaMask.');
-//   }
-// };
-
-
 
 
   return (
-    <div className="App">
-      <WagmiConfig config={wagmiConfig}>
-      <h1 className='text-center'>Simple Ethereum Wallet</h1>
-      <button className='connect-button' onClick={handleConnect}>Connect Wallet</button>
-      <div className='wallet-container'>
-      <div className=' row  main '>
-        <div className=' col wallet-details'>
-        <Web3Button />
-            <p>Balance:  {balance}</p>
-            <p>Wallet Owner: {username} </p>
+    <div>
+      <h3>{dappName}</h3>
+      <div className="container">
+        <div className="namelist">
+        <h3>{walletBalance} BNB</h3>
+          <table>
             
-
+            <thead>
+              <tr>
+                <th>NAMES</th>
+              </tr>
+            </thead>
+            <tbody>
+              {nameList.map((item, index) => (
+                <tr key={index}>
+                  <td>{item}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p>{name}</p>
         </div>
 
-        <div className=' col wallet-details'>
-         
+        <div className="input-form">
+          <form onSubmit={handleSubmit}>
+          <p>{nameChange}</p>
+            <input placeholder="Add name to list" onChange={handleChange}/>
+            <button>Submit</button>
 
-
-          <form onSubmit={handleUserSubmit} >
-          <input className='text-center' placeholder="Change name" onChange={handleChange} value={userNameValue} />
-         
-              <button className='btn btn-dark '>Update User name</button>
+            
           </form>
-
-            
-
-            
         </div>
-
       </div>
-
-      </div>
-      </WagmiConfig>
-      <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
-      
-      
-
     </div>
   );
 }
