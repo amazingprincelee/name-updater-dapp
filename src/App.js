@@ -28,10 +28,7 @@ function App() {
 
 
   useEffect(()=>{
-    const connectWallet = async() => {
-      await provider.send("eth_requestAccounts", []);
-
-    }
+    
 
     const updateDappName = async() => {
        const dappNamer = await contract.getDappName();
@@ -69,8 +66,7 @@ function App() {
     accountBalance()
     .catch(console.error);
 
-    connectWallet()
-    .catch(console.error);
+    
 
     
   })
@@ -94,6 +90,10 @@ function App() {
 
   }
 
+  const handleConnect = async () => {
+    await provider.send("eth_requestAccounts", []);
+  }
+
   
 
 
@@ -102,7 +102,9 @@ function App() {
       <h3>{dappName}</h3>
       <div className="container">
         <div className="namelist">
+        <button onClick={handleConnect}>Connect Wallet</button>
         <h3>{walletBalance} BNB</h3>
+        
           <table>
             
             <thead>
