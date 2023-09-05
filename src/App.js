@@ -16,28 +16,24 @@ function App() {
   const [dappName, setDappName] = useState("");
   const [nameList, setNameList] = useState([]);
 
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  const signer = provider.getSigner();
-
-  const contractAddress = "0xdaBa94659Af7644e2e96b17Ab7F7ADD4595DCB02";
-
-  const contract = new ethers.Contract(contractAddress, ABI, signer);
-
- 
-  
-
 
   useEffect(()=>{
     
 
     const updateDappName = async() => {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+    
+      const contractAddress = "0xdaBa94659Af7644e2e96b17Ab7F7ADD4595DCB02";
+    
+      const contract = new ethers.Contract(contractAddress, ABI, signer);
        const dappNamer = await contract.getDappName();
 
        setDappName(dappNamer);
     }
 
     const accountBalance = async() => {
-
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
       const balance = await provider.getBalance("0x246cc531a16103Cd883E1179ae880323D28b31C0");
       const formatedBalance = ethers.utils.formatEther(balance);
       const balanceRounded = parseFloat(formatedBalance).toFixed(2);
@@ -48,7 +44,12 @@ function App() {
     }
 
     const getNameArray =  async() => {
-
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+    
+      const contractAddress = "0xdaBa94659Af7644e2e96b17Ab7F7ADD4595DCB02";
+    
+      const contract = new ethers.Contract(contractAddress, ABI, signer);
       const names = await contract.getNamesList();
 
       setNameList(names)
@@ -84,6 +85,15 @@ function App() {
 
   const handleSubmit = async (e) => {
       e.preventDefault();
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+    
+      const contractAddress = "0xdaBa94659Af7644e2e96b17Ab7F7ADD4595DCB02";
+    
+      const contract = new ethers.Contract(contractAddress, ABI, signer);
+
+
        await contract.addNames(nameChange);
 
 
@@ -91,6 +101,7 @@ function App() {
   }
 
   const handleConnect = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
   }
 
