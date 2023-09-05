@@ -12,7 +12,6 @@ import ABI from "./ABI"
 
 function App() {
   const [nameChange, setNameChange]= useState("")
-  const [name, setName] = useState("");
   const [walletBalance, setWalletBalance] = useState(0)
   const [dappName, setDappName] = useState("");
   const [nameList, setNameList] = useState([]);
@@ -119,7 +118,6 @@ function App() {
               ))}
             </tbody>
           </table>
-          <p>{name}</p>
         </div>
 
         <div className="input-form">
